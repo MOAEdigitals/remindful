@@ -3,3 +3,7 @@ node_modules/
 .openai/*.tgz
 .openai/sites-local.json
 *.log
+.env
+.env.*
+!.env.example
+supabase/.temp/
