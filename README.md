@@ -32,7 +32,7 @@ The static draft does not require credentials or third-party application account
 
 ## Backend preparation
 
-The Supabase migration and access-control test script are in [supabase/README.md](supabase/README.md). These are prepared source files, not a live database connection. The UI remains the restored draft until project access, migration execution, permission tests, and the sign-in/data adapter are complete.
+The Supabase schema is deployed and its database access tests pass in the Remindful project under MARIUS. See [supabase/README.md](supabase/README.md) for deployment details. The UI remains the restored draft: real sign-in and the data adapter still need to be connected.
 
 ## Android interaction requirements
 

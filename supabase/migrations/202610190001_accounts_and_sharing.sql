@@ -227,4 +227,35 @@ revoke all on function public.create_partner_invite(), public.accept_partner_inv
 grant execute on function public.create_partner_invite(), public.accept_partner_invite(uuid),
   public.disconnect_partner(), public.revoke_partner_invite(uuid) to authenticated;
 
+-- Keep privileged implementations outside exposed API schemas.
+alter function public.create_partner_invite() set schema private;
+alter function public.accept_partner_invite(uuid) set schema private;
+alter function public.disconnect_partner() set schema private;
+alter function public.revoke_partner_invite(uuid) set schema private;
+create function public.create_partner_invite() returns uuid
+language sql security invoker set search_path = '' as $$ select private.create_partner_invite(); $$;
+create function public.accept_partner_invite(invite_code uuid) returns uuid
+language sql security invoker set search_path = '' as $$ select private.accept_partner_invite(invite_code); $$;
+create function public.disconnect_partner() returns void
+language sql security invoker set search_path = '' as $$ select private.disconnect_partner(); $$;
+create function public.revoke_partner_invite(invite_code uuid) returns void
+language sql security invoker set search_path = '' as $$ select private.revoke_partner_invite(invite_code); $$;
+revoke all on function public.create_partner_invite(), public.accept_partner_invite(uuid),
+  public.disconnect_partner(), public.revoke_partner_invite(uuid) from public, anon;
+grant execute on function public.create_partner_invite(), public.accept_partner_invite(uuid),
+  public.disconnect_partner(), public.revoke_partner_invite(uuid) to authenticated;
+revoke all on private.partner_invites from public, anon, authenticated;
+create policy invitations_no_direct_access on private.partner_invites to authenticated
+using (false) with check (false);
+create index partner_invites_inviter_idx on private.partner_invites(inviter_id);
+create index partner_connections_creator_idx on public.partner_connections(created_by);
+create index events_creator_idx on public.events(created_by);
+create index events_updater_idx on public.events(updated_by);
+-- Supabase's automatic RLS trigger does not need direct client execution.
+do $$ begin
+  if to_regprocedure('public.rls_auto_enable()') is not null then
+    execute 'revoke execute on function public.rls_auto_enable() from public, anon, authenticated';
+  end if;
+end $$;
+
 commit;

@@ -1,11 +1,20 @@
-# Supabase setup — pending connection
+# Supabase database setup
 
-This directory prepares the backend. It has not been applied to a live project and the app still uses demo accounts and browser storage.
+The database is deployed to **Remindful** under **MARIUS** (project `kfdohhtqyboffcvgvjei`, Tokyo). The web app still uses demo accounts and browser storage; real sign-in and the data adapter are not connected yet.
+
+## Verified on 20 October 2026
+
+- Applied the initial schema through the Supabase SQL Editor, then the `harden_partner_api` migration through the Supabase integration.
+- Ran `tests/access-control.sql` against the live development project: passed, including partner subscription isolation, private event isolation, shared event CRUD, ownership spoofing, invitation replacement/reuse, and disconnect revocation.
+- Confirmed all public application tables have RLS enabled and anonymous users have no read privileges.
+- Confirmed test accounts and records were rolled back; subscriptions, events, memberships, and invites are empty.
+- Supabase security advisor reports no findings. Performance advisor reports only unused-index information, expected before application traffic. See [unused-index guidance](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
+- Public RPCs run as the caller and delegate to restricted implementations in the unexposed `private` schema.
 
 ## Development setup
 
-1. Connect the Supabase integration and choose or create a development project.
-2. Apply `migrations/202610190001_accounts_and_sharing.sql` to a new database.
+1. For a fresh development project, apply `migrations/202610190001_accounts_and_sharing.sql` once. This bootstrap file includes the final hardened schema; do not rerun it on the existing project.
+2. The existing project's initial schema was initialized manually. Reconcile its migration baseline before using CLI migration push; do not blindly push the bootstrap file into an already initialized database.
 3. Run `tests/access-control.sql` as the project database owner. It rolls back its test users and records.
 4. Configure Supabase Auth site and redirect URLs for the app and localhost.
 5. Add real sign-in and a data adapter using the project URL and public publishable key. Never place a secret/service-role key in browser code or GitHub.
@@ -30,6 +39,6 @@ Tables: `profiles`, `user_preferences`, `subscriptions`, `events` (CRUD under RL
 
 RPCs: `create_partner_invite()`, `accept_partner_invite(invite_code)`, `revoke_partner_invite(invite_code)`, `disconnect_partner()`.
 
-The `private` schema must remain outside Supabase's exposed API schemas. Invite codes and authorization helpers are not application tables. Public RPCs explicitly check the signed-in caller. Helper functions pin their search paths and have restricted execution grants.
+The `private` schema must remain outside Supabase's exposed API schemas. Invite codes and authorization helpers are not application tables. The private RPC implementations explicitly check the signed-in caller. Helper functions pin their search paths and have restricted execution grants.
 
 References: https://supabase.com/docs/guides/database/postgres/row-level-security and https://supabase.com/docs/guides/database/functions
