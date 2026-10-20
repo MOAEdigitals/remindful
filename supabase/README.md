@@ -18,7 +18,7 @@ The database is deployed to **Remindful** under **MARIUS** (project `kfdohhtqybo
 - Ran `tests/access-control.sql` against the live development project: passed, including partner subscription isolation, private event isolation, shared event CRUD, ownership spoofing, invitation replacement/reuse, and disconnect revocation.
 - Confirmed all public application tables have RLS enabled and anonymous users have no read privileges.
 - Confirmed test accounts and records were rolled back; subscriptions, events, memberships, and invites are empty.
-- Supabase security advisor reports no findings. Performance advisor reports only unused-index information, expected before application traffic. See [unused-index guidance](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
+- Database security checks are clear. After enabling real accounts, the Auth advisor reports that leaked-password protection is disabled on the project; see [password security](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). Performance advisor reports only unused-index information, expected before application traffic. See [unused-index guidance](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index).
 - Public RPCs run as the caller and delegate to restricted implementations in the unexposed `private` schema.
 
 ## Development setup
