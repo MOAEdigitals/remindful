@@ -1,15 +1,15 @@
 # Supabase database setup
 
-The database is deployed to **Remindful** under **MARIUS** (project `kfdohhtqyboffcvgvjei`, Tokyo). Username sign-in, cloud data access, profile settings, and account-management source are prepared. Their public deployment is pending account-endpoint approval and end-to-end validation.
+The database is deployed to **Remindful** under **MARIUS** (project `kfdohhtqyboffcvgvjei`, Tokyo). Username sign-in, cloud data access, profile settings, and owner-managed accounts are connected. The account-management Edge Function is deployed. Real owner/partner/stranger tests passed; temporary test accounts and records were removed.
 
 ## Username account provisioning
 
 - `account-access.sql` records the applied username/account-administrator schema additions. The CLI launch failed in this Windows environment, so this is a deployment record, not a generated CLI migration. Reconcile the existing migration baseline before any CLI push.
 - `user_accounts` exposes only the caller's own username. Only server credentials can insert or change account records. Administrative membership and owner setup tokens are in the private schema with no client table access.
-- The `manage-accounts` Edge Function is **not deployed**. Automatic approval review rejected deployment of its privileged public endpoint; explicit approval is required before retrying.
+- The `manage-accounts` Edge Function was deployed after explicit user approval. It performs its own session and database role checks; the first-owner setup path is protected by a single-use secret. The gateway JWT check is disabled to support that protected bootstrap request.
 - The function validates Supabase user tokens and checks the database administrator role for account creation/password reset. Its first-owner flow uses a random, expiring, single-use token, consumed under an advisory lock; a failed competing claim deletes its provisional account.
 - Password authentication uses internal, non-deliverable identifiers derived from validated usernames. These identifiers are not email accounts and are never used to send mail. Public signups must be disabled in Supabase Auth; email confirmations are not disabled globally.
-- After approval, generate a setup token into `private.owner_setup` outside source control, then let the human owner choose their username and password in the setup form. Do not publish a usable setup token in a repository, source file, or public deployment configuration.
+- Owner setup is complete using the username and password supplied by the human owner. The setup token is consumed and cannot be reused. No usable setup token or password is present in the source repository.
 - Account recovery requires the owner to reset another user's password. Owner recovery requires project-administrator intervention; there is no email recovery.
 
 ## Verified on 20 October 2026
@@ -52,3 +52,13 @@ RPCs: `create_partner_invite()`, `accept_partner_invite(invite_code)`, `revoke_p
 The `private` schema must remain outside Supabase's exposed API schemas. Invite codes and authorization helpers are not application tables. The private RPC implementations explicitly check the signed-in caller. Helper functions pin their search paths and have restricted execution grants.
 
 References: https://supabase.com/docs/guides/database/postgres/row-level-security and https://supabase.com/docs/guides/database/functions
+
+## Real-account verification
+
+- Owner creation and username/password sign-in succeeded.
+- A consumed setup token was rejected on reuse; anonymous account creation returned 401 and non-owner account creation returned 403.
+- The owner created two temporary accounts without email delivery.
+- Private subscriptions and events stayed invisible to partners and strangers.
+- Connected partners read, edited, and deleted a shared birthday; edits persisted.
+- Disconnect and record cleanup succeeded. Cloud preferences persisted.
+- Temporary test accounts were deleted; the owner remains with no sample subscriptions or events.

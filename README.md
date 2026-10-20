@@ -1,6 +1,6 @@
 # Remindful
 
-A responsive web app with subscriptions, birthdays, church programs, personal reminders, three interchangeable layouts, and light/dark/system themes. The pending real-account release uses Supabase Auth and Postgres instead of simulated accounts and browser-only records.
+A responsive web app with subscriptions, birthdays, church programs, personal reminders, three interchangeable layouts, and light/dark/system themes. The real-account release uses Supabase Auth and Postgres instead of simulated accounts and browser-only records.
 
 Run with Node.js:
 
@@ -10,7 +10,7 @@ npm run dev
 
 Open http://127.0.0.1:4173. Run domain checks with `npm test`.
 
-## Real-account release (deployment pending)
+## Real-account behavior
 
 - Sign in with a username and password. Accounts are created by the owner from Profile → Settings; there is no public signup or email recovery.
 - Subscriptions and preferences are owner-only under database RLS. Shared schedule entries require an active partner connection. Private events remain owner-only.
@@ -25,14 +25,14 @@ Open http://127.0.0.1:4173. Run domain checks with `npm test`.
 
 1. Approve/deploy the restricted account-management endpoint, establish the owner with a single-use setup link, and verify two real accounts end to end.
 2. Add scheduled web push with delivery logs, retries, timezone-aware scheduling, and recurrence handling.
-3. Add server history, conflict handling, and recovery for partner edits/deletes.
-4. Complete browser/mobile accessibility and delivery testing before Android integration.
+2. Add server history, conflict handling, and recovery for partner edits/deletes.
+3. Complete browser/mobile accessibility and delivery testing before Android integration.
 
 The browser uses only a public publishable key. Administrator credentials are environment variables available only to the account-management Edge Function. The first owner setup link must be generated separately and must never be committed to GitHub.
 
 ## Backend preparation
 
-The Supabase schema is deployed in the Remindful project under MARIUS. See [supabase/README.md](supabase/README.md) for deployment and verification status. The public site remains the demo until the new endpoint is approved and real-account validation is complete.
+The Supabase schema is deployed in the Remindful project under MARIUS. See [supabase/README.md](supabase/README.md) for deployment and verification status. The account-management endpoint is deployed and real owner/partner/stranger access tests passed. Temporary test accounts and records have been removed.
 
 ## Android interaction requirements
 
